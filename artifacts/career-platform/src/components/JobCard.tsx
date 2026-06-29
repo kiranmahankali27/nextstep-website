@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Job } from "@workspace/api-client-react";
-import { MapPin, Briefcase, DollarSign, Clock, CheckCircle2 } from "lucide-react";
+import { MapPin, Briefcase, IndianRupee, Clock, CheckCircle2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface JobCardProps {
@@ -60,7 +60,7 @@ export function JobCard({ job }: JobCardProps) {
               <span className="capitalize">{job.jobType.replace('-', ' ')}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <DollarSign className="w-4 h-4 shrink-0 text-foreground/50" />
+              <IndianRupee className="w-4 h-4 shrink-0 text-foreground/50" />
               <span className="truncate">{job.salaryDisplay || 'Not specified'}</span>
             </div>
             <div className="flex items-center gap-1.5">

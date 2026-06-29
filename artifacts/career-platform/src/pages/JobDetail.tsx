@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-  MapPin, Briefcase, DollarSign, Clock, CheckCircle2, 
+  MapPin, Briefcase, IndianRupee, Clock, CheckCircle2, 
   ExternalLink, Share2, Building, Calendar, GraduationCap 
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
@@ -160,7 +160,7 @@ export default function JobDetail() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <DollarSign className="w-5 h-5 text-primary mt-0.5" />
+                    <IndianRupee className="w-5 h-5 text-primary mt-0.5" />
                     <div>
                       <div className="font-medium">Salary</div>
                       <div className="text-sm text-muted-foreground">{job.salaryDisplay || "Not specified"}</div>

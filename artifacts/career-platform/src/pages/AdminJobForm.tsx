@@ -472,7 +472,7 @@ export default function AdminJobForm() {
                     <FormItem>
                       <FormLabel>Salary (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. $80k - $100k / year" {...field} />
+                        <Input placeholder="e.g. ₹8 LPA - ₹12 LPA / year" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

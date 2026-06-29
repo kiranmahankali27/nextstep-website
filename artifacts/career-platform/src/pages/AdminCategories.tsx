@@ -1,52 +1,87 @@
 import { useState } from "react";
-import { useListCategories, useDeleteCategory } from "@workspace/api-client-react";
+import { useListCategories, useDeleteCategory, useCreateCategory } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger
+} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, MoreHorizontal, Edit, Trash, Briefcase } from "lucide-react";
+import { Search, Plus, MoreHorizontal, Edit, Trash, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const SUGGESTED_ICONS = ["💻", "📊", "🏥", "🎓", "🏦", "🛒", "⚙️", "🎨", "📱", "🔬", "🏛️", "✈️", "📢", "🤝", "🌐"];
+
+interface CategoryForm {
+  name: string;
+  description: string;
+  icon: string;
+}
+
+const emptyForm: CategoryForm = { name: "", description: "", icon: "" };
 
 export default function AdminCategories() {
   const [search, setSearch] = useState("");
-  
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<CategoryForm>(emptyForm);
+
   const { data, isLoading, refetch } = useListCategories();
-  
   const deleteMutation = useDeleteCategory();
+  const createMutation = useCreateCategory();
   const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) {
+      toast({ variant: "destructive", title: "Validation error", description: "Category name is required." });
+      return;
+    }
+    const payload: Record<string, unknown> = { name: form.name.trim() };
+    if (form.description) payload.description = form.description;
+    if (form.icon) payload.icon = form.icon;
+
+    createMutation.mutate(
+      { data: payload as Parameters<typeof createMutation.mutate>[0]["data"] },
+      {
+        onSuccess: () => {
+          toast({ title: "Category added", description: `"${form.name}" has been created.` });
+          setOpen(false);
+          setForm(emptyForm);
+          refetch();
+        },
+        onError: () => {
+          toast({ variant: "destructive", title: "Error", description: "Failed to create category. Please try again." });
+        },
+      }
+    );
+  };
 
   const handleDelete = (id: number) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
-    
     deleteMutation.mutate(
       { id },
       {
         onSuccess: () => {
-          toast({
-            title: "Category deleted",
-            description: "The category has been successfully deleted.",
-          });
+          toast({ title: "Category deleted", description: "The category has been successfully deleted." });
           refetch();
         },
         onError: () => {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to delete the category. Please try again.",
-          });
+          toast({ variant: "destructive", title: "Error", description: "Failed to delete the category. Please try again." });
         }
       }
     );
   };
 
-  const filteredCategories = data?.filter(category => 
+  const filteredCategories = data?.filter(category =>
     category.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -57,10 +92,71 @@ export default function AdminCategories() {
           <h1 className="text-3xl font-bold tracking-tight">Manage Categories</h1>
           <p className="text-muted-foreground mt-1">Organize jobs by defining industry categories.</p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Category
-        </Button>
+
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(emptyForm); }}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Category
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Category</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="cat-name">Category Name <span className="text-destructive">*</span></Label>
+                <Input
+                  id="cat-name"
+                  placeholder="e.g. Information Technology"
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Icon (emoji)</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {SUGGESTED_ICONS.map(icon => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, icon }))}
+                      className={`w-9 h-9 rounded-md text-xl flex items-center justify-center border transition-colors hover:bg-muted ${form.icon === icon ? "border-primary bg-primary/10" : "border-border"}`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+                <Input
+                  placeholder="Or type a custom emoji / text..."
+                  value={form.icon}
+                  onChange={e => setForm(f => ({ ...f, icon: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cat-desc">Description</Label>
+                <Textarea
+                  id="cat-desc"
+                  placeholder="Brief description of this category..."
+                  rows={3}
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                />
+              </div>
+
+              <DialogFooter className="pt-2">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={createMutation.isPending} className="gap-2">
+                  {createMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Add Category
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -105,8 +201,8 @@ export default function AdminCategories() {
                     <TableRow key={category.id}>
                       <TableCell>
                         <div className="flex items-center gap-3 font-medium">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <Briefcase className="w-4 h-4" />
+                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
+                            {category.icon || "📁"}
                           </div>
                           {category.name}
                         </div>
@@ -133,7 +229,7 @@ export default function AdminCategories() {
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               className="text-destructive focus:text-destructive cursor-pointer"
                               onClick={() => handleDelete(category.id)}
                             >
