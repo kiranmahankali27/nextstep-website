@@ -1,21 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { 
-  useGetJob, useCreateJob, useUpdateJob, useListCompanies, useListCategories, JobInput 
+  useGetJob, useCreateJob, useUpdateJob, useListCompanies, useListCategories, useCreateCompany,
+  getGetJobQueryKey, JobInput 
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, ArrowLeft, Plus, X } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, X, Building2, ChevronDown, Check, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { getListCompaniesQueryKey } from "@workspace/api-client-react";
 
 const jobFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -38,6 +40,178 @@ const jobFormSchema = z.object({
 
 type JobFormValues = z.infer<typeof jobFormSchema>;
 
+function CompanyCombobox({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (id: number) => void;
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const createCompanyMutation = useCreateCompany();
+
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newWebsite, setNewWebsite] = useState("");
+  const [newIndustry, setNewIndustry] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { data: companies, refetch } = useListCompanies({ limit: 200 });
+
+  const selectedCompany = companies?.find((c) => c.id === value);
+
+  const filtered = (companies ?? []).filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setShowNewForm(false);
+        setSearch("");
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleCreateCompany = () => {
+    if (!newName.trim()) return;
+    createCompanyMutation.mutate(
+      { data: { name: newName.trim(), website: newWebsite.trim() || null, industry: newIndustry.trim() || null } },
+      {
+        onSuccess: (created) => {
+          queryClient.invalidateQueries({ queryKey: getListCompaniesQueryKey({ limit: 200 }) });
+          refetch();
+          onChange(created.id);
+          setOpen(false);
+          setShowNewForm(false);
+          setSearch("");
+          setNewName("");
+          setNewWebsite("");
+          setNewIndustry("");
+          toast({ title: "Company created", description: `"${created.name}" added and selected.` });
+        },
+        onError: () => {
+          toast({ variant: "destructive", title: "Error", description: "Failed to create company." });
+        },
+      }
+    );
+  };
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <button
+        type="button"
+        onClick={() => { setOpen((o) => !o); setSearch(""); setShowNewForm(false); }}
+        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      >
+        <span className={selectedCompany ? "text-foreground" : "text-muted-foreground"}>
+          {selectedCompany ? (
+            <span className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-muted-foreground" />
+              {selectedCompany.name}
+            </span>
+          ) : (
+            "Search or add company..."
+          )}
+        </span>
+        <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg">
+          {/* Search input */}
+          <div className="flex items-center gap-2 border-b px-3 py-2">
+            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+            <input
+              autoFocus
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              placeholder="Type to search..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setShowNewForm(false); }}
+            />
+          </div>
+
+          {/* Company list */}
+          <div className="max-h-48 overflow-y-auto">
+            {filtered.length === 0 && !showNewForm && (
+              <div className="px-3 py-2 text-sm text-muted-foreground">No companies found.</div>
+            )}
+            {filtered.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => { onChange(c.id); setOpen(false); setSearch(""); }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground text-left"
+              >
+                <Check className={`w-4 h-4 shrink-0 ${c.id === value ? "opacity-100 text-primary" : "opacity-0"}`} />
+                <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                {c.name}
+                {c.industry && <span className="ml-auto text-xs text-muted-foreground">{c.industry}</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* Add new company button / mini-form */}
+          <div className="border-t">
+            {!showNewForm ? (
+              <button
+                type="button"
+                onClick={() => { setShowNewForm(true); setNewName(search); }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-accent font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                Add "{search || "new company"}"
+              </button>
+            ) : (
+              <div className="p-3 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">New Company</p>
+                <Input
+                  autoFocus
+                  placeholder="Company name *"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCreateCompany(); } }}
+                />
+                <Input
+                  placeholder="Website (optional)"
+                  value={newWebsite}
+                  onChange={(e) => setNewWebsite(e.target.value)}
+                />
+                <Input
+                  placeholder="Industry (optional)"
+                  value={newIndustry}
+                  onChange={(e) => setNewIndustry(e.target.value)}
+                />
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleCreateCompany}
+                    disabled={!newName.trim() || createCompanyMutation.isPending}
+                    className="flex-1"
+                  >
+                    {createCompanyMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
+                    Create & Select
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setShowNewForm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminJobForm() {
   const params = useParams();
   const [, setLocation] = useLocation();
@@ -47,12 +221,12 @@ export default function AdminJobForm() {
   const isEditing = params.id !== undefined && params.id !== "new";
   const jobId = isEditing ? parseInt(params.id as string, 10) : 0;
 
-  const { data: companies } = useListCompanies({ limit: 100 });
   const { data: categories } = useListCategories();
   
   const { data: job, isLoading: isJobLoading } = useGetJob(jobId, {
     query: {
       enabled: isEditing && !isNaN(jobId) && jobId > 0,
+      queryKey: getGetJobQueryKey(jobId),
     }
   });
 
@@ -217,23 +391,10 @@ export default function AdminJobForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Company</FormLabel>
-                      <Select 
-                        onValueChange={(val) => field.onChange(parseInt(val, 10))} 
-                        value={field.value ? field.value.toString() : ""}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a company" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {companies?.map(company => (
-                            <SelectItem key={company.id} value={company.id.toString()}>
-                              {company.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <CompanyCombobox value={field.value} onChange={field.onChange} />
+                      </FormControl>
+                      <FormDescription>Search existing companies or type a name to add a new one.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

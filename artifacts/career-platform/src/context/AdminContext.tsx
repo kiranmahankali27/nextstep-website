@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useGetAdminSession, useAdminLogout } from "@workspace/api-client-react";
+import { useGetAdminSession, useAdminLogout, getGetAdminSessionQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 
 interface AdminContextType {
@@ -30,6 +30,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     query: {
       enabled: !!token,
       retry: false,
+      queryKey: getGetAdminSessionQueryKey(),
     },
     request: {
       headers: {
@@ -47,7 +48,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   });
 
   const logout = () => {
-    logoutMutation.mutate({}, {
+    logoutMutation.mutate(undefined as unknown as void, {
       onSettled: () => {
         setToken(null);
         setLocation("/admin");

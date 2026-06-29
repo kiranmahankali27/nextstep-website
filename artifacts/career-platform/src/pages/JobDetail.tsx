@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useParams } from "wouter";
-import { useGetJob, useRecordJobView } from "@workspace/api-client-react";
+import { useGetJob, useRecordJobView, getGetJobQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +22,7 @@ export default function JobDetail() {
   const { data: job, isLoading } = useGetJob(id, {
     query: {
       enabled: !isNaN(id) && id > 0,
+      queryKey: getGetJobQueryKey(id),
     }
   });
 
