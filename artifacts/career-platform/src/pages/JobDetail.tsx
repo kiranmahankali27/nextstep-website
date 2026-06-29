@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "wouter";
 import { useGetJob, useRecordJobView, getGetJobQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -7,16 +7,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   MapPin, Briefcase, IndianRupee, Clock, CheckCircle2, 
-  ExternalLink, Share2, Building, Calendar, GraduationCap 
+  ExternalLink, Share2, Building, Calendar, GraduationCap, Timer
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 export default function JobDetail() {
   const params = useParams();
-  // Assume slug might be just an ID, or parse it if it ends in an ID
-  // For safety, let's just parse it as int. In a real app, we'd lookup by slug.
-  // The API spec requires `id: number` for getJob.
   const id = parseInt(params.slug || "0", 10);
   
   const { data: job, isLoading } = useGetJob(id, {
@@ -28,6 +25,32 @@ export default function JobDetail() {
 
   const recordView = useRecordJobView();
   const hasRecorded = useRef(false);
+
+  const [countdown, setCountdown] = useState(10);
+  const [unlocked, setUnlocked] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startCountdown = useCallback(() => {
+    if (timerRef.current) return;
+    timerRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          timerRef.current = null;
+          setUnlocked(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    startCountdown();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [startCountdown]);
 
   useEffect(() => {
     if (job?.id && !hasRecorded.current) {
@@ -99,11 +122,6 @@ export default function JobDetail() {
             <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
               <Button variant="outline" size="icon" onClick={handleShare}>
                 <Share2 className="w-4 h-4" />
-              </Button>
-              <Button className="w-full md:w-auto" asChild>
-                <a href={job.applyLink} target="_blank" rel="noreferrer">
-                  Apply Now <ExternalLink className="w-4 h-4 ml-2" />
-                </a>
               </Button>
             </div>
           </div>
@@ -221,6 +239,56 @@ export default function JobDetail() {
           </div>
         </div>
       </div>
+
+      {/* Sticky Apply Bar with Countdown */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
+        <div className="container mx-auto px-4 max-w-5xl py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Timer className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">
+                  {unlocked
+                    ? "Application link is now available!"
+                    : "Apply link unlocks in"}
+                </span>
+              </div>
+              {!unlocked && (
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-lg tabular-nums shadow-md select-none">
+                  {countdown}
+                </div>
+              )}
+            </div>
+
+            <div className="w-full sm:w-auto">
+              {unlocked ? (
+                <Button size="lg" className="w-full sm:w-auto gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500" asChild>
+                  <a href={job.applyLink} target="_blank" rel="noreferrer">
+                    Apply Now
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              ) : (
+                <Button size="lg" disabled className="w-full sm:w-auto gap-2 opacity-60 cursor-not-allowed">
+                  Apply Now — wait {countdown}s
+                  <Timer className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-3 h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+              style={{ width: `${((10 - countdown) / 10) * 100}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Spacer so content isn't hidden behind sticky bar */}
+      <div className="h-28" />
     </div>
   );
 }
