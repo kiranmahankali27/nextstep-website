@@ -12,6 +12,6 @@ export const categoriesTable = pgTable("categories", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertCategorySchema = createInsertSchema(categoriesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCategorySchema = createInsertSchema(categoriesTable).omit({ id: true, slug: true, createdAt: true, updatedAt: true });
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Category = typeof categoriesTable.$inferSelect;

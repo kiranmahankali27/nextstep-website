@@ -31,6 +31,6 @@ export const jobsTable = pgTable("jobs", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertJobSchema = createInsertSchema(jobsTable).omit({ id: true, views: true, createdAt: true, updatedAt: true });
+export const insertJobSchema = createInsertSchema(jobsTable).omit({ id: true, slug: true, views: true, createdAt: true, updatedAt: true });
 export type InsertJob = z.infer<typeof insertJobSchema>;
 export type Job = typeof jobsTable.$inferSelect;

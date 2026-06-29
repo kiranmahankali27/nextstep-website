@@ -17,6 +17,6 @@ export const companiesTable = pgTable("companies", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertCompanySchema = createInsertSchema(companiesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCompanySchema = createInsertSchema(companiesTable).omit({ id: true, slug: true, createdAt: true, updatedAt: true });
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Company = typeof companiesTable.$inferSelect;
