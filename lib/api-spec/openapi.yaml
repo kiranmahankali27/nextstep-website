@@ -1,22 +1,31 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AI Career Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: jobs
+    description: Job listings
+  - name: companies
+    description: Companies
+  - name: categories
+    description: Job categories
+  - name: admin
+    description: Admin operations
+  - name: stats
+    description: Platform statistics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +33,489 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List jobs with filters
+      parameters:
+        - name: keyword
+          in: query
+          schema: { type: string }
+        - name: company
+          in: query
+          schema: { type: string }
+        - name: location
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: experience
+          in: query
+          schema: { type: string }
+        - name: salaryMin
+          in: query
+          schema: { type: integer }
+        - name: salaryMax
+          in: query
+          schema: { type: integer }
+        - name: remote
+          in: query
+          schema: { type: boolean }
+        - name: type
+          in: query
+          schema: { type: string }
+        - name: featured
+          in: query
+          schema: { type: boolean }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 12 }
+      responses:
+        "200":
+          description: Job list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobListResponse"
+
+    post:
+      operationId: createJob
+      tags: [admin]
+      summary: Create a job posting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /jobs/featured:
+    get:
+      operationId: listFeaturedJobs
+      tags: [jobs]
+      summary: Get featured jobs for homepage
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 6 }
+      responses:
+        "200":
+          description: Featured jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /jobs/trending:
+    get:
+      operationId: listTrendingJobs
+      tags: [jobs]
+      summary: Get trending/most-viewed jobs
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 8 }
+      responses:
+        "200":
+          description: Trending jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /jobs/latest:
+    get:
+      operationId: listLatestJobs
+      tags: [jobs]
+      summary: Get latest job postings
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        "200":
+          description: Latest jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get job details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Job detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Not found
+
+    patch:
+      operationId: updateJob
+      tags: [admin]
+      summary: Update a job posting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+    delete:
+      operationId: deleteJob
+      tags: [admin]
+      summary: Delete a job posting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /jobs/{id}/view:
+    post:
+      operationId: recordJobView
+      tags: [jobs]
+      summary: Record a job view (for trending)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: View recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /companies:
+    get:
+      operationId: listCompanies
+      tags: [companies]
+      summary: List companies
+      parameters:
+        - name: featured
+          in: query
+          schema: { type: boolean }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 12 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        "200":
+          description: Company list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+
+    post:
+      operationId: createCompany
+      tags: [admin]
+      summary: Create a company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  /companies/{id}:
+    get:
+      operationId: getCompany
+      tags: [companies]
+      summary: Get company details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Company detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+    patch:
+      operationId: updateCompany
+      tags: [admin]
+      summary: Update a company
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+    delete:
+      operationId: deleteCompany
+      tags: [admin]
+      summary: Delete a company
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List job categories
+      responses:
+        "200":
+          description: Category list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+    post:
+      operationId: createCategory
+      tags: [admin]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    patch:
+      operationId: updateCategory
+      tags: [admin]
+      summary: Update a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+    delete:
+      operationId: deleteCategory
+      tags: [admin]
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /stats/platform:
+    get:
+      operationId: getPlatformStats
+      tags: [stats]
+      summary: Get platform-wide stats (total jobs, companies, views)
+      responses:
+        "200":
+          description: Platform stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformStats"
+
+  /stats/admin:
+    get:
+      operationId: getAdminStats
+      tags: [stats]
+      summary: Get admin dashboard analytics
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /stats/top-jobs:
+    get:
+      operationId: getTopViewedJobs
+      tags: [stats]
+      summary: Get most viewed jobs for admin analytics
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 5 }
+      responses:
+        "200":
+          description: Top viewed jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResult"
+        "401":
+          description: Invalid credentials
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/me:
+    get:
+      operationId: getAdminSession
+      tags: [admin]
+      summary: Get current admin session info
+      responses:
+        "200":
+          description: Admin session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSession"
+        "401":
+          description: Unauthorized
+
+  /newsletter/subscribe:
+    post:
+      operationId: subscribeNewsletter
+      tags: [jobs]
+      summary: Subscribe to newsletter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterInput"
+      responses:
+        "200":
+          description: Subscribed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +523,402 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        companyId:
+          type: integer
+        companyName:
+          type: string
+        companyLogo:
+          type: ["string", "null"]
+        companyWebsite:
+          type: ["string", "null"]
+        location:
+          type: string
+        remote:
+          type: boolean
+        jobType:
+          type: string
+          description: "full-time, part-time, internship, contract, walkin, government"
+        category:
+          type: string
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        salaryDisplay:
+          type: ["string", "null"]
+        experience:
+          type: string
+        education:
+          type: string
+        description:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        selectionProcess:
+          type: ["string", "null"]
+        applyLink:
+          type: string
+        deadline:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        status:
+          type: string
+          description: "published, draft"
+        views:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, title, slug, companyId, companyName, location, remote, jobType, category, experience, education, description, skills, applyLink, featured, status, views, createdAt, updatedAt]
+
+    JobInput:
+      type: object
+      properties:
+        title:
+          type: string
+        companyId:
+          type: integer
+        location:
+          type: string
+        remote:
+          type: boolean
+          default: false
+        jobType:
+          type: string
+        category:
+          type: string
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        salaryDisplay:
+          type: ["string", "null"]
+        experience:
+          type: string
+        education:
+          type: string
+        description:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        selectionProcess:
+          type: ["string", "null"]
+        applyLink:
+          type: string
+        deadline:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+          default: false
+        status:
+          type: string
+          default: "draft"
+      required: [title, companyId, location, jobType, category, experience, education, description, skills, applyLink]
+
+    JobUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        companyId:
+          type: integer
+        location:
+          type: string
+        remote:
+          type: boolean
+        jobType:
+          type: string
+        category:
+          type: string
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        salaryDisplay:
+          type: ["string", "null"]
+        experience:
+          type: string
+        education:
+          type: string
+        description:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        selectionProcess:
+          type: ["string", "null"]
+        applyLink:
+          type: string
+        deadline:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        status:
+          type: string
+
+    JobListResponse:
+      type: object
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+      required: [jobs, total, page, limit, totalPages]
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        logo:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        size:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        featured:
+          type: boolean
+        jobCount:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, name, slug, featured, jobCount, createdAt]
+
+    CompanyInput:
+      type: object
+      properties:
+        name:
+          type: string
+        logo:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        size:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        featured:
+          type: boolean
+          default: false
+      required: [name]
+
+    CompanyUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        logo:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        size:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        featured:
+          type: boolean
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        icon:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        jobCount:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, name, slug, jobCount, createdAt]
+
+    CategoryInput:
+      type: object
+      properties:
+        name:
+          type: string
+        icon:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+      required: [name]
+
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        icon:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+
+    PlatformStats:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+        totalCompanies:
+          type: integer
+        totalCategories:
+          type: integer
+        totalViews:
+          type: integer
+        activeJobs:
+          type: integer
+      required: [totalJobs, totalCompanies, totalCategories, totalViews, activeJobs]
+
+    AdminStats:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+        publishedJobs:
+          type: integer
+        draftJobs:
+          type: integer
+        totalCompanies:
+          type: integer
+        totalCategories:
+          type: integer
+        totalViews:
+          type: integer
+        jobsByCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryCount"
+        jobsByType:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeCount"
+        recentJobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+      required: [totalJobs, publishedJobs, draftJobs, totalCompanies, totalCategories, totalViews, jobsByCategory, jobsByType, recentJobs]
+
+    CategoryCount:
+      type: object
+      properties:
+        category:
+          type: string
+        count:
+          type: integer
+      required: [category, count]
+
+    TypeCount:
+      type: object
+      properties:
+        type:
+          type: string
+        count:
+          type: integer
+      required: [type, count]
+
+    AdminLoginInput:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required: [username, password]
+
+    AdminLoginResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        token:
+          type: string
+      required: [success, message, token]
+
+    AdminSession:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+        username:
+          type: ["string", "null"]
+      required: [authenticated]
+
+    NewsletterInput:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: ["string", "null"]
+      required: [email]
