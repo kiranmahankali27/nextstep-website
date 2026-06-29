@@ -109,7 +109,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <main className="flex-1 w-full overflow-hidden">
+        <main className="flex-1 w-full min-w-0">
           {children}
         </main>
       </div>
