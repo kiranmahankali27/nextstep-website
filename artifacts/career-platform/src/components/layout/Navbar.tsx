@@ -38,12 +38,6 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-4">
-          <Button asChild>
-            <Link href="/jobs">Browse Jobs</Link>
-          </Button>
-        </div>
-
         {/* Mobile Nav */}
         <div className="md:hidden">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -67,10 +61,6 @@ export function Navbar() {
                     {item.label}
                   </Link>
                 ))}
-                <div className="h-px bg-border my-2" />
-                <Button className="w-full" asChild onClick={() => setIsOpen(false)}>
-                  <Link href="/jobs">Browse Jobs</Link>
-                </Button>
               </div>
             </SheetContent>
           </Sheet>

@@ -7,7 +7,8 @@ import {
   LayoutDashboard, 
   LogOut, 
   Menu,
-  Tags
+  Tags,
+  FileText
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -22,6 +23,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     { href: "/admin/jobs", label: "Jobs", icon: Briefcase },
     { href: "/admin/companies", label: "Companies", icon: Building },
     { href: "/admin/categories", label: "Categories", icon: Tags },
+    { href: "/admin/pages", label: "Pages", icon: FileText },
   ];
 
   return (

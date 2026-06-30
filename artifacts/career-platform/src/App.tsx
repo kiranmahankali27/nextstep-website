@@ -21,6 +21,8 @@ import AdminJobs from "@/pages/AdminJobs";
 import AdminJobForm from "@/pages/AdminJobForm";
 import AdminCompanies from "@/pages/AdminCompanies";
 import AdminCategories from "@/pages/AdminCategories";
+import AdminPages from "@/pages/AdminPages";
+import StaticPage from "@/pages/StaticPage";
 import { useAdmin } from "@/context/AdminContext";
 
 const queryClient = new QueryClient({
@@ -88,6 +90,9 @@ function Router() {
       <Route path="/admin/categories">
         <ProtectedAdminRoute component={AdminCategories} />
       </Route>
+      <Route path="/admin/pages">
+        <ProtectedAdminRoute component={AdminPages} />
+      </Route>
 
       {/* Public Routes */}
       <Route path="/">
@@ -114,6 +119,20 @@ function Router() {
         <PublicLayout>
           <Categories />
         </PublicLayout>
+      </Route>
+
+      {/* Static CMS Pages */}
+      <Route path="/about">
+        <PublicLayout><StaticPage /></PublicLayout>
+      </Route>
+      <Route path="/contact">
+        <PublicLayout><StaticPage /></PublicLayout>
+      </Route>
+      <Route path="/privacy-policy">
+        <PublicLayout><StaticPage /></PublicLayout>
+      </Route>
+      <Route path="/terms-of-service">
+        <PublicLayout><StaticPage /></PublicLayout>
       </Route>
 
       <Route>

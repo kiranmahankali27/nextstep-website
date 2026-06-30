@@ -6,6 +6,7 @@ import categoriesRouter from "./categories";
 import statsRouter from "./stats";
 import adminRouter from "./admin";
 import newsletterRouter from "./newsletter";
+import pagesRouter from "./pages";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(categoriesRouter);
 router.use(statsRouter);
 router.use(adminRouter);
 router.use(newsletterRouter);
+router.use(pagesRouter);
 
 export default router;
