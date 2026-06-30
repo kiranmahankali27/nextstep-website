@@ -240,55 +240,57 @@ export default function JobDetail() {
         </div>
       </div>
 
-      {/* Sticky Apply Bar with Countdown */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
-        <div className="container mx-auto px-4 max-w-5xl py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Timer className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">
-                  {unlocked
-                    ? "Application link is now available!"
-                    : "Apply link unlocks in"}
-                </span>
+      {/* Apply Section — inline at bottom of content, above footer */}
+      <div className="container mx-auto px-4 max-w-5xl mt-8 pb-12">
+        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <div className="bg-primary/5 border-b px-6 py-4 flex items-center gap-2">
+            <Timer className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-foreground">
+              {unlocked ? "Application link is ready!" : "Preparing your application link…"}
+            </span>
+          </div>
+          <div className="px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex-1 space-y-3 w-full">
+              <p className="text-sm text-muted-foreground">
+                {unlocked
+                  ? "You can now proceed to the official application page."
+                  : `Please read the job description above carefully. The apply link will unlock in ${countdown} second${countdown !== 1 ? "s" : ""}.`}
+              </p>
+              {/* Progress bar */}
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${((10 - countdown) / 10) * 100}%` }}
+                />
               </div>
-              {!unlocked && (
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-lg tabular-nums shadow-md select-none">
-                  {countdown}
-                </div>
-              )}
             </div>
 
-            <div className="w-full sm:w-auto">
+            <div className="flex items-center gap-4 shrink-0">
+              {!unlocked && (
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground font-bold text-2xl tabular-nums shadow-md select-none">
+                    {countdown}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground mt-1">seconds</span>
+                </div>
+              )}
               {unlocked ? (
-                <Button size="lg" className="w-full sm:w-auto gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500" asChild>
-                  <a href={job.applyLink} target="_blank" rel="noreferrer">
+                <Button size="lg" className="gap-2 animate-in fade-in zoom-in-95 duration-500 px-8" asChild>
+                  <a href={job.applyLink} target="_blank" rel="noreferrer noopener">
                     Apply Now
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 </Button>
               ) : (
-                <Button size="lg" disabled className="w-full sm:w-auto gap-2 opacity-60 cursor-not-allowed">
-                  Apply Now — wait {countdown}s
+                <Button size="lg" disabled className="gap-2 px-8 opacity-50 cursor-not-allowed">
+                  Apply Now
                   <Timer className="w-4 h-4" />
                 </Button>
               )}
             </div>
           </div>
-
-          {/* Progress bar */}
-          <div className="mt-3 h-1.5 w-full bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-              style={{ width: `${((10 - countdown) / 10) * 100}%` }}
-            />
-          </div>
         </div>
       </div>
-
-      {/* Spacer so content isn't hidden behind sticky bar */}
-      <div className="h-28" />
     </div>
   );
 }
