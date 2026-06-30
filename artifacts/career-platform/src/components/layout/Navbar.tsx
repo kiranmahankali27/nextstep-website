@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Building, LayoutGrid, Search, UserCircle, Menu } from "lucide-react";
+import { Briefcase, Building, LayoutGrid, Search, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 
@@ -39,11 +39,8 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link href="/admin">Employer Login</Link>
-          </Button>
           <Button asChild>
-            <Link href="/jobs">Upload Resume</Link>
+            <Link href="/jobs">Browse Jobs</Link>
           </Button>
         </div>
 
@@ -71,14 +68,8 @@ export function Navbar() {
                   </Link>
                 ))}
                 <div className="h-px bg-border my-2" />
-                <Button variant="outline" className="w-full justify-start" asChild onClick={() => setIsOpen(false)}>
-                  <Link href="/admin">
-                    <UserCircle className="mr-2 h-5 w-5" />
-                    Employer Login
-                  </Link>
-                </Button>
                 <Button className="w-full" asChild onClick={() => setIsOpen(false)}>
-                  <Link href="/jobs">Upload Resume</Link>
+                  <Link href="/jobs">Browse Jobs</Link>
                 </Button>
               </div>
             </SheetContent>

@@ -1,8 +1,10 @@
 import { useGetAdminStats } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase, Building, Eye, FileText, CheckCircle, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Briefcase, Building, Eye, CheckCircle, Plus, ArrowRight, Tags } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { format } from "date-fns";
+import { Link } from "wouter";
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useGetAdminStats();
@@ -20,6 +22,42 @@ export default function AdminDashboard() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
         <p className="text-muted-foreground mt-1">Platform statistics and recent activity.</p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2 rounded-xl bg-primary text-primary-foreground p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold mb-1">Post a New Job</h2>
+            <p className="text-primary-foreground/80 text-sm">Fill in job details and publish instantly to reach thousands of candidates.</p>
+          </div>
+          <Button size="lg" variant="secondary" className="gap-2 shrink-0 font-semibold" asChild>
+            <Link href="/admin/jobs/new">
+              <Plus className="w-4 h-4" />
+              Post Job Now
+            </Link>
+          </Button>
+        </div>
+        <div className="flex flex-col gap-3">
+          <Button variant="outline" className="justify-between h-12 px-4" asChild>
+            <Link href="/admin/companies">
+              <span className="flex items-center gap-2"><Building className="w-4 h-4 text-primary" /> Manage Companies</span>
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+          </Button>
+          <Button variant="outline" className="justify-between h-12 px-4" asChild>
+            <Link href="/admin/categories">
+              <span className="flex items-center gap-2"><Tags className="w-4 h-4 text-primary" /> Manage Categories</span>
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+          </Button>
+          <Button variant="outline" className="justify-between h-12 px-4" asChild>
+            <Link href="/admin/jobs">
+              <span className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-primary" /> All Job Listings</span>
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
