@@ -155,20 +155,20 @@ export default function Home() {
       </section>
 
       {/* ── Stats Bar ── */}
-      <section className="border-b bg-white shadow-sm">
+      <section className="border-b border-white/10 bg-white/5">
         <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-border text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/10 text-center">
             {[
-              { value: stats?.totalJobs ?? "...", label: "Live Jobs", color: "text-indigo-600" },
-              { value: stats?.totalCompanies ?? "...", label: "Companies", color: "text-violet-600" },
-              { value: stats?.activeJobs ?? "...", label: "New This Week", color: "text-pink-600" },
-              { value: "24h", label: "Avg. Response", color: "text-emerald-600" },
+              { value: stats?.totalJobs ?? "...", label: "Live Jobs", color: "text-indigo-400" },
+              { value: stats?.totalCompanies ?? "...", label: "Companies", color: "text-violet-400" },
+              { value: stats?.activeJobs ?? "...", label: "New This Week", color: "text-pink-400" },
+              { value: "24h", label: "Avg. Response", color: "text-emerald-400" },
             ].map((s, i) => (
               <div key={i} className="px-4 py-2">
                 <div className={`text-3xl font-extrabold mb-1 ${s.color}`}>
                   {typeof s.value === "number" ? new Intl.NumberFormat().format(s.value) : s.value}
                 </div>
-                <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{s.label}</div>
+                <div className="text-xs text-white/40 font-semibold uppercase tracking-wider">{s.label}</div>
               </div>
             ))}
           </div>
@@ -176,32 +176,32 @@ export default function Home() {
       </section>
 
       {/* ── Explore by Category ── */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
+      <section className="py-16 md:py-24 bg-[#0d0b2a]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge className="mb-3 bg-primary/10 text-primary border-transparent">Browse by Role</Badge>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Explore by Category</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Pick your field and discover hundreds of opportunities waiting for you.</p>
+            <Badge className="mb-3 bg-indigo-500/20 text-indigo-300 border-indigo-500/30">Browse by Role</Badge>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 text-white">Explore by Category</h2>
+            <p className="text-white/50 max-w-xl mx-auto">Pick your field and discover hundreds of opportunities waiting for you.</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.name}
                 href={`/jobs?category=${encodeURIComponent(cat.name)}`}
-                className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-6 text-center hover:shadow-lg hover:border-primary/30 transition-all duration-300 card-glow"
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 text-center hover:bg-white/10 hover:border-indigo-500/40 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300"
               >
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   <cat.icon className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="font-bold text-foreground text-sm mb-1 leading-tight">{cat.name}</h3>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <h3 className="font-bold text-white text-sm mb-1 leading-tight">{cat.name}</h3>
+                <p className="text-xs text-white/40 flex items-center justify-center gap-1">
                   <ArrowRight className="w-3 h-3" /> Browse Jobs
                 </p>
               </Link>
             ))}
           </div>
           <div className="text-center mt-10">
-            <Button variant="outline" asChild className="rounded-full px-8">
+            <Button variant="outline" asChild className="rounded-full px-8 border-white/20 text-white/70 hover:bg-white/10 hover:text-white">
               <Link href="/categories">View All Categories →</Link>
             </Button>
           </div>
@@ -209,15 +209,15 @@ export default function Home() {
       </section>
 
       {/* ── Latest Jobs ── */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-[#100e2e]">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
             <div>
-              <Badge className="mb-2 bg-primary/10 text-primary border-transparent">Fresh Opportunities</Badge>
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Latest Job Listings</h2>
-              <p className="text-muted-foreground mt-1">Verified jobs posted in the last 24 hours.</p>
+              <Badge className="mb-2 bg-indigo-500/20 text-indigo-300 border-indigo-500/30">Fresh Opportunities</Badge>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Latest Job Listings</h2>
+              <p className="text-white/50 mt-1">Verified jobs posted in the last 24 hours.</p>
             </div>
-            <Button variant="outline" className="rounded-full shrink-0" asChild>
+            <Button variant="outline" className="rounded-full shrink-0 border-white/20 text-white/70 hover:bg-white/10 hover:text-white" asChild>
               <Link href="/jobs">View All Jobs →</Link>
             </Button>
           </div>
@@ -238,21 +238,21 @@ export default function Home() {
       </section>
 
       {/* ── Why NextStep ── */}
-      <section className="py-16 md:py-20 bg-muted/30">
+      <section className="py-16 md:py-20 bg-[#0d0b2a]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge className="mb-3 bg-primary/10 text-primary border-transparent">Why Choose Us</Badge>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Built for freshers, by freshers</h2>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Everything you need to land your first job — all in one place.</p>
+            <Badge className="mb-3 bg-indigo-500/20 text-indigo-300 border-indigo-500/30">Why Choose Us</Badge>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Built for freshers, by freshers</h2>
+            <p className="text-white/50 mt-2 max-w-xl mx-auto">Everything you need to land your first job — all in one place.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {WHY_US.map((item) => (
-              <div key={item.title} className="bg-card rounded-2xl p-6 border border-border/50 hover:shadow-md transition-all card-glow">
+              <div key={item.title} className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/8 hover:border-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/10 transition-all">
                 <div className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center mb-4`}>
                   <item.icon className="w-6 h-6" />
                 </div>
-                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                <h3 className="font-bold text-lg mb-2 text-white">{item.title}</h3>
+                <p className="text-sm text-white/50 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
